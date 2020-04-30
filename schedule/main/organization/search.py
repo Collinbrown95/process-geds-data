@@ -33,13 +33,12 @@ def get_path_to_node(val, root_node):
                     get_path_rec(node["_children"][i])
         
         if node["name"] == val and not node_found:
-            print("Found it!")
             node_found = True
             pass
         elif not node_found:
             try:
                 stack.pop()
             except Exception as e:
-                print("Exception at ", e)
+                pass
     get_path_rec(root_node)
     return stack

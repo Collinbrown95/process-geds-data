@@ -22,7 +22,8 @@ def build_leaf(name, leaf):
         leaf:
             A dict-like object.
     """
-    if name:
+    # Only want to process names if it is a string
+    if type(name) is str:
         res = {"name": name.rstrip()}
         # add children node if the leaf actually has any children
         if len(leaf.keys()) > 0:
@@ -65,4 +66,4 @@ def get_org_chart(df):
     Returns an org chart as a python dict
     '''
     chart = flat_to_hierarchical(df)
-    return chart[0]["_children"][0]
+    return chart

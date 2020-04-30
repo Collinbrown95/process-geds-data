@@ -9,9 +9,23 @@ def prepare_org_chart(df, tree_depth=7):
     Returns:
         org_chart: a python dict-like object containing the org chart.
     '''
-    org_table = df[["org_name"]].drop_duplicates()
-    org_struc = df["org_structure"].drop_duplicates()
-    org_struc = org_struc.str.split(":", n=-1, expand=True)
-    columns = [i for i in range(0, min(tree_depth + 1, len(org_struc.columns)), 1)]
-    org_struc = org_struc[columns]
-    return get_org_chart(org_struc)
+    # Start by getting a dataframe that contains unique organization structures
+    # in both languages
+    org_struc_en = df["org_structure_en"].str.replace('\(.*?\)', '').drop_duplicates()
+    org_struc_fr = df["org_structure_fr"].str.replace('\(.*?\)', '').drop_duplicates()
+    # Split org units into columns and keep a subset of them based on the
+    # desired tree depth.
+    org_struc_en = org_struc_en.str.split(" :", n=-1, expand=True)
+    org_struc_fr = org_struc_fr.str.split(" :", n=-1, expand=True)
+    # Column subset is the same in both languages
+    columns = [i for i in range(0, min(tree_depth + 1, len(org_struc_en.columns)), 1)]
+    org_struc_en = org_struc_en[columns]
+    org_struc_fr = org_struc_fr[columns]
+    # Get the org charts
+    org_chart_en = get_org_chart(org_struc_en)
+    org_chart_fr = get_org_chart(org_struc_fr)
+    # Remove any instances of None from the list of org charts
+    # TODO: check why one of the departments yields None
+    org_chart_en = [dept for dept in org_chart_en if dept is not None]
+    org_chart_fr = [dept for dept in org_chart_fr if dept is not None]
+    return org_chart_en, org_chart_fr

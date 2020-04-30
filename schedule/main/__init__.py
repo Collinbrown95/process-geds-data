@@ -12,14 +12,14 @@ def main():
     '''
     # Fetch GEDS data and write to csv 
     df = prepare_data()
-    # # Create the employees table
+    # Create the employees table
     create_employee_table(df)
-    # # Load the org chart
-    # org_chart = prepare_org_chart(df)
-    # # Create departments table
-    # create_department_table(df, org_chart)
-    # # Create organizations table
-    # create_organization_table(df, org_chart)
+    # Load the org chart
+    org_chart_en, org_chart_fr = prepare_org_chart(df)
+    # Create departments table
+    create_department_table(df, org_chart_en, org_chart_fr)
+    # Create organizations table
+    create_organization_table(df, org_chart_en, org_chart_fr)
 
 if __name__ == "__main__":
     main()
