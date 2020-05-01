@@ -34,6 +34,7 @@ def create_department_table(df, org_chart_en, org_chart_fr):
             "org_chart_en": Text, 
             "org_chart_fr": Text,
         })
+    return dept_df
 
 def get_department_org_chart(department, org_chart):
     '''

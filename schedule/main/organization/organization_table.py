@@ -17,7 +17,7 @@ def create_organization_table(df, org_chart_en, org_chart_fr, tree_depth=7):
     # Get the paths to each org unit and store them in a table column
     # TODO: try normalizing text to avoid things like capital letters preventing
     # the search from being successful
-    org_df["org_chart_path"] = generate_org_paths(org_df, org_chart_en, "en")
+    org_df = generate_org_paths(org_df, org_chart_en, "en")
     # # Write org_df to the database
     org_df[["org_id", "org_name_en", "org_name_fr", "dept_id", "org_chart_path"]].to_sql(
         "organizations",
@@ -32,6 +32,7 @@ def create_organization_table(df, org_chart_en, org_chart_fr, tree_depth=7):
             "dept_id": Integer,
             "org_chart_path": Text,
         })
+    return org_df
 
 def generate_org_paths(df, org_chart, lang):
     '''
@@ -47,5 +48,5 @@ def generate_org_paths(df, org_chart, lang):
             return json.dumps(path_to_node)
         return None
     # Serialize the path to the node as a string
-    df[f"org_chart_path_{lang}"] = df.apply(get_org_path, axis=1, args=(org_chart,))
-    return df[f"org_chart_path_{lang}"]
+    df["org_chart_path"] = df.apply(get_org_path, axis=1, args=(org_chart,))
+    return df

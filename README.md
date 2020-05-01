@@ -87,9 +87,9 @@ The code below runs a scheduled job using Python's ```apscheduler``` library. In
 Every function is called from ```main```. The call graph below outlines which functions are called and in which order in development vs. production. The main difference between the two is that the production graph will not fetch the GEDS data from the url every time it is ran; instead, it will store a local copy as a csv file and use that instead to avoid unnecessarily downloading the same file many times while testing during development.
 
 __Dev call graph__
-![call graph](https://g.gravizo.com/svg?digraph%20G%20%7B%0A%20%20main%20-%3E%20prepare_data%20%5Blabel%3D%221%22%5D%3B%0A%20%20prepare_data%20-%3E%20%22csv%20on%20disk%3F%22%20%5Bcolor%3D%22blue%22%5D%3B%0A%20%20%22csv%20on%20disk%3F%22%20-%3E%20load_df_from_csv%20%5Blabel%3D%22yes%22%5D%3B%0A%20%20%22csv%20on%20disk%3F%22%20-%3E%20fetch_geds%20%5Blabel%3D%22no%22%5D%3B%0A%20%20%22csv%20on%20disk%3F%22%20-%3E%20prepare_data%20%5Bcolor%3D%22red%22%20label%3D%22df%22%5D%3B%0A%20%20prepare_data%20-%3E%20%7Bpreprocess_columns%3B%20create_table_keys%7D%3B%0A%20%20prepare_data%20-%3E%20main%20%5Bcolor%3D%22red%22%20label%3D%22df%22%5D%3B%0A%20%20main%20-%3E%20create_employees_table%20%5Blabel%3D%222%22%5D%3B%0A%20%20main%20-%3E%20prepare_org_chart%20%5Blabel%3D%223%22%5D%3B%0A%20%20prepare_org_chart%20-%3E%20main%20%5Bcolor%3D%22red%22%20label%3D%22org%20chart%22%5D%3B%0A%20%20prepare_org_chart%20-%3E%20get_org_chart%3B%0A%20%20get_org_chart%20-%3E%20flat_to_hierarchical%3B%0A%20%20flat_to_hierarchical%20-%3E%20%7Bbuild_leaf%3B%20ctree%7D%3B%0A%20%20main%20-%3E%20create_department_table%20%5Blabel%3D%224%22%5D%3B%0A%20%20create_department_table%20-%3E%20%7Bget_department_org_chart%7D%3B%0A%20%20main%20-%3E%20create_organization_table%20%5Blabel%3D%225%22%5D%3B%0A%20%20create_organization_table%20-%3E%20generate_org_paths%3B%0A%7D)
-<!-- This is the original graph
-<img src='https://g.gravizo.com/svg?
+![call graph](https://g.gravizo.com/svg?digraph%20G%20%7B%0A%20%20main%20-%3E%20prepare_data%20%5Blabel%3D%221%22%5D%3B%0A%20%20prepare_data%20-%3E%20%22csv%20on%20disk%3F%22%20%5Bcolor%3D%22blue%22%5D%3B%0A%20%20%22csv%20on%20disk%3F%22%20-%3E%20load_df_from_csv%20%5Blabel%3D%22yes%22%5D%3B%0A%20%20%22csv%20on%20disk%3F%22%20-%3E%20fetch_geds%20%5Blabel%3D%22no%22%5D%3B%0A%20%20%22csv%20on%20disk%3F%22%20-%3E%20prepare_data%20%5Bcolor%3D%22red%22%20label%3D%22df%22%5D%3B%0A%20%20prepare_data%20-%3E%20%7Bpreprocess_columns%3B%20create_table_keys%7D%3B%0A%20%20prepare_data%20-%3E%20main%20%5Bcolor%3D%22red%22%20label%3D%22df%22%5D%3B%0A%20%20main%20-%3E%20create_employees_table%20%5Blabel%3D%222%22%5D%3B%0A%20%20main%20-%3E%20prepare_org_chart%20%5Blabel%3D%223%22%5D%3B%0A%20%20prepare_org_chart%20-%3E%20main%20%5Bcolor%3D%22red%22%20label%3D%22org%20chart%22%5D%3B%0A%20%20prepare_org_chart%20-%3E%20get_org_chart%3B%0A%20%20get_org_chart%20-%3E%20flat_to_hierarchical%3B%0A%20%20flat_to_hierarchical%20-%3E%20%7Bbuild_leaf%3B%20ctree%7D%3B%0A%20%20main%20-%3E%20create_department_table%20%5Blabel%3D%224%22%5D%3B%0A%20%20create_department_table%20-%3E%20main%20%5Bcolor%3D%22red%22%20label%3D%22dept_df%22%5D%3B%0A%20%20create_department_table%20-%3E%20%7Bget_department_org_chart%7D%3B%0A%20%20main%20-%3E%20create_organization_table%20%5Blabel%3D%225%22%5D%3B%0A%20%20create_organization_table%20-%3E%20main%20%5Bcolor%3D%22red%22%20label%3D%22org_df%22%5D%3B%0A%20%20create_organization_table%20-%3E%20generate_org_paths%3B%0A%20%20main%20-%3E%20elastic_bulk_upload%20%5Blabel%3D%226%22%5D%3B%0A%20%20elastic_bulk_upload%20-%3E%20%7Bmerge_dataframes%3B%20bulk_upload_employees%3B%20bulk_upload_organizations%7D%3B%0A%7D)
+<!-- This is the original graph -->
+<!-- <img src='https://g.gravizo.com/svg?
 digraph G {
   main -> prepare_data [label="1"];
   prepare_data -> "csv on disk?" [color="blue"];
@@ -105,11 +105,14 @@ digraph G {
   get_org_chart -> flat_to_hierarchical;
   flat_to_hierarchical -> {build_leaf; ctree};
   main -> create_department_table [label="4"];
+  create_department_table -> main [color="red" label="dept_df"];
   create_department_table -> {get_department_org_chart};
   main -> create_organization_table [label="5"];
+  create_organization_table -> main [color="red" label="org_df"];
   create_organization_table -> generate_org_paths;
-}'/>
--->
+  main -> elastic_bulk_upload [label="6"];
+  elastic_bulk_upload -> {merge_dataframes; bulk_upload_employees; bulk_upload_organizations};
+}'/> -->
 
 <!-- Github's flavour of markdown doesn't support url encoding. A temporary workaround to this is given below.
 In a python terminal (tested with python 3.8), do
@@ -127,7 +130,7 @@ Then copy + paste the encoded url into the image tag
 -->
 
 __Production call graph__
-![call graph](https://g.gravizo.com/svg?digraph%20G%20%7B%0A%20%20main%20-%3E%20prepare_data%20%5Blabel%3D%221%22%5D%3B%0A%20%20prepare_data%20-%3E%20%22csv%20on%20disk%3F%22%20%5Bcolor%3D%22blue%22%5D%3B%0A%20%20%22csv%20on%20disk%3F%22%20-%3E%20load_df_from_csv%20%5Blabel%3D%22yes%22%5D%3B%0A%20%20%22csv%20on%20disk%3F%22%20-%3E%20fetch_geds%20%5Blabel%3D%22no%22%5D%3B%0A%20%20%22csv%20on%20disk%3F%22%20-%3E%20prepare_data%20%5Bcolor%3D%22red%22%20label%3D%22df%22%5D%3B%0A%20%20prepare_data%20-%3E%20%7Bpreprocess_columns%3B%20create_table_keys%7D%3B%0A%20%20prepare_data%20-%3E%20main%20%5Bcolor%3D%22red%22%20label%3D%22df%22%5D%3B%0A%20%20main%20-%3E%20create_employees_table%20%5Blabel%3D%222%22%5D%3B%0A%20%20main%20-%3E%20prepare_org_chart%20%5Blabel%3D%223%22%5D%3B%0A%20%20prepare_org_chart%20-%3E%20main%20%5Bcolor%3D%22red%22%20label%3D%22org%20chart%22%5D%3B%0A%20%20prepare_org_chart%20-%3E%20get_org_chart%3B%0A%20%20get_org_chart%20-%3E%20flat_to_hierarchical%3B%0A%20%20flat_to_hierarchical%20-%3E%20%7Bbuild_leaf%3B%20ctree%7D%3B%0A%20%20main%20-%3E%20create_department_table%20%5Blabel%3D%224%22%5D%3B%0A%20%20create_department_table%20-%3E%20%7Bget_department_org_chart%7D%3B%0A%20%20main%20-%3E%20create_organization_table%20%5Blabel%3D%225%22%5D%3B%0A%20%20create_organization_table%20-%3E%20generate_org_paths%3B%0A%7D)
+![call graph](https://g.gravizo.com/svg?digraph%20G%20%7B%0A%20%20main%20-%3E%20prepare_data%20%5Blabel%3D%221%22%5D%3B%0A%20%20prepare_data%20-%3E%20%22csv%20on%20disk%3F%22%20%5Bcolor%3D%22blue%22%5D%3B%0A%20%20%22csv%20on%20disk%3F%22%20-%3E%20load_df_from_csv%20%5Blabel%3D%22yes%22%5D%3B%0A%20%20%22csv%20on%20disk%3F%22%20-%3E%20fetch_geds%20%5Blabel%3D%22no%22%5D%3B%0A%20%20%22csv%20on%20disk%3F%22%20-%3E%20prepare_data%20%5Bcolor%3D%22red%22%20label%3D%22df%22%5D%3B%0A%20%20prepare_data%20-%3E%20%7Bpreprocess_columns%3B%20create_table_keys%7D%3B%0A%20%20prepare_data%20-%3E%20main%20%5Bcolor%3D%22red%22%20label%3D%22df%22%5D%3B%0A%20%20main%20-%3E%20create_employees_table%20%5Blabel%3D%222%22%5D%3B%0A%20%20main%20-%3E%20prepare_org_chart%20%5Blabel%3D%223%22%5D%3B%0A%20%20prepare_org_chart%20-%3E%20main%20%5Bcolor%3D%22red%22%20label%3D%22org%20chart%22%5D%3B%0A%20%20prepare_org_chart%20-%3E%20get_org_chart%3B%0A%20%20get_org_chart%20-%3E%20flat_to_hierarchical%3B%0A%20%20flat_to_hierarchical%20-%3E%20%7Bbuild_leaf%3B%20ctree%7D%3B%0A%20%20main%20-%3E%20create_department_table%20%5Blabel%3D%224%22%5D%3B%0A%20%20create_department_table%20-%3E%20main%20%5Bcolor%3D%22red%22%20label%3D%22dept_df%22%5D%3B%0A%20%20create_department_table%20-%3E%20%7Bget_department_org_chart%7D%3B%0A%20%20main%20-%3E%20create_organization_table%20%5Blabel%3D%225%22%5D%3B%0A%20%20create_organization_table%20-%3E%20main%20%5Bcolor%3D%22red%22%20label%3D%22org_df%22%5D%3B%0A%20%20create_organization_table%20-%3E%20generate_org_paths%3B%0A%20%20main%20-%3E%20elastic_bulk_upload%20%5Blabel%3D%226%22%5D%3B%0A%20%20elastic_bulk_upload%20-%3E%20%7Bmerge_dataframes%3B%20bulk_upload_employees%3B%20bulk_upload_organizations%7D%3B%0A%7D)
 <!-- This is the original graph
 <img src='https://g.gravizo.com/svg?
 digraph G {
@@ -154,6 +157,31 @@ digraph G {
 
 #### test
 
+## Elasticsearch
+>TODO: need to test that the org chart paths generated agree with the paths to nodes in the org chart tree structure.
+
+This repository assumes there exists an instance of Elasticsearch that it can upload data to via Elasticsearch's [bulk api](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html). This repository makes use of the [Python client for Elasticsearch](https://elasticsearch-py.readthedocs.io/en/master/).
+
+> Note: Elasticsearch 6.0.0+ [removed support for multiple mapping types](https://www.elastic.co/guide/en/elasticsearch/reference/6.0/removal-of-types.html). As an alternative to multiple mapping types, this repository uses a single index for each type of document. In this case, the two types are ```employee``` and ```organization```. As such, there are two Elasticsearch indices named ```employee``` and ```organization```.
+
+### Set up Elasticsearch with Docker
+If you have [Docker](https://www.docker.com/) installed on your system, you can get up-and-running with Elasticsearch in only a few steps. These steps are outlined briefly below, but see [here](https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html) for more information.
+
+1. Pull the Elasticsearch image from the Elastic docker registry.
+```bash
+docker pull docker.elastic.co/elasticsearch/elasticsearch:6.5.1
+```
+2. Start a single node cluster of elasticsearch on your local machine (host defaults to ```localhost```).
+```bash
+docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:6.5.1
+```
+__Note:__ there are ```xms``` and ```xmx``` flags that [control the minimum/maximum heap size for JVM](https://www.elastic.co/guide/en/elasticsearch/reference/6.8/heap-size.html).
+
+### Postman Collection
+> TODO: create this and document it
+
+
+
 
 ## Authors
 - Collin Brown - collin.brown@hrsdc-rhdcc.gc.ca
@@ -162,3 +190,8 @@ digraph G {
 1. [SQLalchemy guide ch 1](https://www.oreilly.com/library/view/essential-sqlalchemy-2nd/9781491916544/ch01.html)
 2. [sqlalchemy schema](https://overiq.com/sqlalchemy-101/defining-schema-in-sqlalchemy-orm/)
 3. [pandas with sqlalchemy](https://hackersandslackers.com/connecting-pandas-to-a-sql-database-with-sqlalchemy/)
+4. [python es client tutorial](https://kb.objectrocket.com/elasticsearch/how-to-use-python-helpers-to-bulk-load-data-into-an-elasticsearch-index)
+5. [python es client documentation](https://elasticsearch-py.readthedocs.io/en/master/)
+6. [python es client bulk helpers](https://elasticsearch-py.readthedocs.io/en/master/helpers.html)
+7. [SO post on using Elasticsearch with human names](https://stackoverflow.com/questions/20632042/elasticsearch-searching-for-human-names)
+8. 

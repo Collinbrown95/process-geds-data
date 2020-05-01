@@ -26,6 +26,9 @@ class DataConfig:
     ORG_SPECIAL_CHARACTERS = ast.literal_eval(config.get('data', 'org_special_characters'))
     
 
+class ElasticConfig:
+    ELASTIC_URL = config.get('elasticsearch', 'elastic_url')
+    ELASTIC_TIMEOUT = int(config.get('elasticsearch', 'timeout'))
 
 class TestConfig:
     TEST_DATA_PATH = config.get('data', 'test_data_path')

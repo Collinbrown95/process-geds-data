@@ -47,6 +47,8 @@ def preprocess_columns(df):
     # organizations with identical names.
     df["compound_name_en"] = df["department_en"] + ": " + df['org_name_en']
     df["compound_name_fr"] = df["department_fr"] + ": " + df['org_name_fr']
+    # Create compound names for people as an additional field for elasticsearch
+    df["full_name"] = df["first_name"] + " " + df["last_name"]
     return df
 
 def create_table_keys(df):
