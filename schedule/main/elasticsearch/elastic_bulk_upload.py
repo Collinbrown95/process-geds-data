@@ -30,7 +30,11 @@ def merge_dataframes(df, org_df, dept_df):
     dept_df = dept_df[["dept_id", "department_en", "department_fr"]]
     # Attach organization and department info to the employees dataframe
     df = df.merge(dept_df, left_on='dept_id', right_on='dept_id')
-    df = df.merge(org_df, left_on='org_id', right_on='org_id')
+    # Note: the reason for subsetting org_df here is to avoid pandas convention of
+    # applying _x and _y to two columns with the same name in different dataframes.
+    df = df.merge(org_df[["org_id", "org_name_en", "org_name_fr", "org_chart_path"]],
+                         left_on='org_id',
+                         right_on='org_id')
     # Construct org df also
     org_df = org_df.merge(dept_df, left_on='dept_id', right_on='dept_id')
     return df, org_df
@@ -64,7 +68,10 @@ def bulk_upload_employees(df, es):
                     "org_name_fr": str(row["org_name_fr"]),
                     "org_chart_path": str(row["org_chart_path"]),
                     "department_en": str(row["department_en"]),
-                    "department_fr": str(row["department_fr"])},}
+                    "department_fr": str(row["department_fr"]),
+                    "org_id": str(row["org_id"]),
+                    "dept_id": str(row["dept_id"])}
+                }
     try:
         res = helpers.bulk(es, employee_data_generator(df))
         print("SUCCESS: RESULT\n", res)

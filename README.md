@@ -1,6 +1,11 @@
 # process-geds-data
 > This repository runs a scheduled job that fetches the [Government of Canada Employee Contact Information (GEDS)](https://open.canada.ca/data/en/dataset/8ec4a9df-b76b-4a67-8f93-cdbc2e040098) dataset that is made available under the [Open Government License - Canada](https://open.canada.ca/en/open-government-licence-canada). The data produced by the scripts in this repository are used in a REST API which can be found [here](), and an instance of Elastic Search. These services then provide data to a front-end that shows a searchable interactive organizational chart, which can be found [here](https://github.com/Collinbrown95/react-hooks-d3/tree/code-refactoring).
 
+> TODO:
+> 1. Make org chart write "children" keys instead of "_children" keys by default, so that the front end does not need to unhide and rehide during d3 indexing.
+> 2. Create separate indices in elastic search for french/english fields (will likely want to search them differently).
+> 3. Check how the organization name column is being compared with the organization path column. Some typos/casing/spacing errors cause a failure to identify a search path.
+
 ## Data
 The data produced by the scripts in this repository can be broken into two types: flat and hierarchical. Flat data are written into the SQL tables described below.
 
@@ -171,9 +176,9 @@ If you have [Docker](https://www.docker.com/) installed on your system, you can 
 ```bash
 docker pull docker.elastic.co/elasticsearch/elasticsearch:6.5.1
 ```
-2. Start a single node cluster of elasticsearch on your local machine (host defaults to ```localhost```).
+2. Start a single node cluster of elasticsearch on your local machine (host defaults to ```localhost```). Note that the arguments ```-e "http.cors.enabled=true" -e "http.cors.allow-origin=*"``` should only be used in development.
 ```bash
-docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:6.5.1
+docker run -p 9200:9200 -p 9300:9300 -e "http.cors.enabled=true" -e "http.cors.allow-origin=*" -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:6.5.1
 ```
 __Note:__ there are ```xms``` and ```xmx``` flags that [control the minimum/maximum heap size for JVM](https://www.elastic.co/guide/en/elasticsearch/reference/6.8/heap-size.html).
 
