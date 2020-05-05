@@ -33,6 +33,13 @@ def prepare_org_chart(df, tree_depth=7):
     # TODO: check why one of the departments yields None
     org_chart_en = [dept for dept in org_chart_en if dept is not None]
     org_chart_fr = [dept for dept in org_chart_fr if dept is not None]
+    # Attach an organization ID to every org chart node
+    df["org_name_en_lower"] = df["org_name_en"].str.lower()
+    # TODO: maybe just assign french org charts org_id's created from traversing
+    # the english tree to avoid character encoding errors.
+    # df["org_name_fr_lower"] = df["org_name_fr"].str.lower()
+    org_chart_en = attach_org_id(df, org_chart_en, lang="en")
+    # org_chart_fr = attach_org_id(df, org_chart_fr, lang="fr")
     return org_chart_en, org_chart_fr
 
 def remove_duplicates(df, columns):
@@ -73,3 +80,40 @@ def remove_duplicates(df, columns):
         past_Nones = 0
         current_Nones = 0
     return unique_df
+
+def attach_org_id(df, org_chart, lang="en"):
+    '''
+    For every node in the org chart, attaches a key that contains the
+    organization id of each business unit.
+    Args:
+        df: a pandas dataframe containing the geds dataset.
+        org_chart: a dict-like structure containing hierarchical org chart data.
+    '''
+    for idx, chart in enumerate(org_chart):
+        recursive_add(chart, df, lang=lang)
+        # if idx > 1: break
+    return org_chart
+
+def recursive_add(org_chart, df, lang="en"):
+    '''
+    Adds the org_id to each node of the org chart. This is used downstream to
+    perform fast lookup on data related to the organization. For example, given
+    the org_id, it is possible to look up information for all people on that
+    team.
+    '''
+    if org_chart.get("_children") is None:
+        org_chart["org_id"] = get_org_id(org_chart['name'], df, lang=lang)
+#         print("org chart is ", org_chart)
+    else:
+        for idx, child in enumerate(org_chart["_children"]):
+            recursive_add(child, df)
+
+def get_org_id(org_name, df, lang="en"):
+    '''
+    Given a dataframe containing organization names and org_id's, returns the
+    org id associated with a given name.
+    '''
+    try:
+        return str(df[df[f"org_name_{lang}_lower"] == org_name.lower()].iloc[0]["org_id"])
+    except:
+        print("could not find match for ", org_name)

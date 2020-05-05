@@ -1,6 +1,7 @@
 # repo specific
 iris.csv
 original_geds.csv
+temp/
 # IDE-specific
 .vscode/
 # ignore sqlite data
