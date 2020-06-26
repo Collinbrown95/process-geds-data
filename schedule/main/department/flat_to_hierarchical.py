@@ -1,7 +1,7 @@
 '''
 Functions to convert flat file into hierarchical file - borrowed from this
 (https://stackoverflow.com/questions/43757965/convert-csv-to-json-tree-structure)
-StackExchange post - see link for more detail on how these functions work.
+StackOverflow post - see link for more detail on how these functions work.
 '''
 from collections import defaultdict
 
